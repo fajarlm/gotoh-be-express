@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       );
       Chat_Message.belongsTo(models.Group_Chat,
         { foreignKey: 'group_chat_id' }
-       );
+      );
     }
   }
   Chat_Message.init({
@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     group_chat_id: DataTypes.INTEGER,
     message: DataTypes.TEXT,
     image_message: DataTypes.STRING,
-    is_read: DataTypes.BOOLEAN
+    is_read: { 
+      type: DataTypes.BOOLEAN, 
+      defaultValue: false }
   }, {
     sequelize,
     modelName: 'Chat_Message',
