@@ -13,6 +13,7 @@ module.exports = {
         try {
             const check = jwt.verify(token,auth_secret)
             req.user = check;
+
             next();
         } catch (err) {
             return res.status(401).json(response(401,"unauthorized","Please Login and try again"))

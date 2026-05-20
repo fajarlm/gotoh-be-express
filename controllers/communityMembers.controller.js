@@ -38,5 +38,20 @@ module.exports = {
         } catch (error) {
             return res.status(500).json(response(500, "Error", "An error occurred while retrieving community members"));
         }
+    },
+    deleteCommunityMember: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const communityMember = await Community_Members.findOne({
+                where: { id }
+            });
+            if (!communityMember) {
+                return res.status(404).json(response(404, "Error", "Community member not found"));
+            }
+            await communityMember.destroy();
+            return res.status(200).json(response(200, "Success", "Community member deleted successfully"));
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", "An error occurred while deleting community member"));
+        }
     }
 }
