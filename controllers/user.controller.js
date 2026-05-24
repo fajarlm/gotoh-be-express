@@ -11,11 +11,14 @@ const { Op } = require("sequelize");
 module.exports = {
     getUsers: async (req, res) => {
         try {
-            const { name, sortBy, order, limit, page } = req.query;
+            const { name,email, sortBy, order, limit, page } = req.query;
             const offset = Number(page - 1) * Number(limit);
             const { rows, count } = await User.findAndCountAll({
-                where: name ? {
-                    name: { [Op.like]: `%${name}%` }
+                where: name || email ? {
+                    [Op.or]: [
+                        { name: { [Op.like]: `%${name}%` } },
+                        { email: { [Op.like]: `%${email}%` } }
+                    ]
                 } : {},
 
                 order: sortBy && order ? [[sortBy, order]] : [],
@@ -35,7 +38,7 @@ module.exports = {
             return res.status(500).json(response(500, "Error", "An error occurred while retrieving users"));
         }
     },
-    profile: async (req, res) => {
+    getProfile: async (req, res) => {
         try {
             const { avatar, name, email, password } = req.body;
 
@@ -50,7 +53,46 @@ module.exports = {
         }
         return res.status(200).json(response(200, "Success", user))
     },
-    profileHealth: async (req, res) => {
+    updateProfile: async (req, res) => {
+        try {
+            const { avatar, name, email, password } = req.body;
+
+            const user = await req.user.id;
+
+            if (!user) {
+                return res.status(404).json(response(404, "Error", "User not found"))
+            }
+            schema = {
+                avatar: { type: "string", empty: false },
+                name: { type: "string", min: 3, empty: false },
+                email: { type: "email", empty: false },
+                password: { type: "string", min: 6, empty: false }
+            }
+            const data = {
+                avatar: avatar,
+                name: name,
+                email: email,
+                password: password
+            }
+            
+            const validate = v.validate(data, schema);
+
+            if (validate.length > 0) {
+                return res.status(400).json(response(400, "Validation Error", validate))
+            }
+            const updateData = {
+                avatar: avatar,
+                name: name,
+                email: email,
+                password: passwordHash.generate(password)
+            };
+
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", "An error occurred while updating user profile"))
+        }
+        return res.status(200).json(response(200, "Success", user))
+    },
+    getProfileHealth: async (req, res) => {
         try {
             const { weight, height, health_target } = req.body;
 
@@ -83,4 +125,16 @@ module.exports = {
         }
         return res.status(200).json(response(200, "Success", user))
     },
+    showUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json(response(404, "Error", "User not found"))
+            }
+            return res.status(200).json(response(200, "Success", user))
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", "An error occurred while fetching user"))
+        }
+    }
 }

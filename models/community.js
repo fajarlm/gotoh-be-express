@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     type: DataTypes.ENUM('public', 'private'),
     cover_image: DataTypes.STRING,
     created_by: DataTypes.INTEGER,
+    location: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Community',

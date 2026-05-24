@@ -1,4 +1,4 @@
-const ChatMessage = require('../models/ChatMessage');
+const ChatMessage = require('../models/chat_message');
 
 module.exports=(io)=>{
 

@@ -27,6 +27,9 @@ module.exports = {
       created_by: {
         type: Sequelize.INTEGER
       },
+      location : {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
