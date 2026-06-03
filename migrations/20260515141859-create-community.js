@@ -23,6 +23,7 @@ module.exports = {
       },
       cover_image: {
         type: Sequelize.STRING
+        
       },
       created_by: {
         type: Sequelize.INTEGER

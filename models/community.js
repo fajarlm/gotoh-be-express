@@ -14,19 +14,13 @@ module.exports = (sequelize, DataTypes) => {
       Community.belongsTo(models.User,
         { foreignKey: 'created_by' }
       );
-      Community.hasMany(models.Post,
-        { foreignKey: 'community_id' }
-      );
+      // Community.hasMany(models.Post,
+      //   { foreignKey: 'community_id' }
+      // );
       Community.belongsToMany(models.User,
          { through: models.Community_Members, foreignKey: 'community_id' }
       );
-       Community.hasMany(models.Group_Chat,
-        { foreignKey: 'community_id' }
-       );
-       Community.hasMany(models.Like,
-        { foreignKey: 'community_id' }
-       );
-       Community.hasMany(models.Recommendation_History,
+      Community.hasMany(models.Chat_Message,
         { foreignKey: 'community_id' }
        );
     }
@@ -34,8 +28,6 @@ module.exports = (sequelize, DataTypes) => {
   Community.init({
     name: DataTypes.STRING,
     description: DataTypes.STRING,
-    category: DataTypes.STRING,
-    type: DataTypes.ENUM('public', 'private'),
     cover_image: DataTypes.STRING,
     created_by: DataTypes.INTEGER,
     location: DataTypes.STRING,

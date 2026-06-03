@@ -18,6 +18,10 @@ module.exports = {
       joined_at: {
         type: Sequelize.DATE
       },
+      role :{
+        type: Sequelize.ENUM('admin', 'member'),
+        defaultValue: 'member'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

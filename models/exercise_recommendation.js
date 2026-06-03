@@ -11,10 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      
     }
   }
   exercise_recommendation.init({
-    bmi_category: DataTypes.INTEGER,
+    bmi_category: DataTypes.STRING,
     recommendation: DataTypes.TEXT,
     duration: DataTypes.INTEGER
   }, {

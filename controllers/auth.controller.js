@@ -42,18 +42,24 @@ module.exports = {
             }
 
             const token = jwt.sign(
-                { user_id: user.id, user_email: user.email, user_name: user.name },
+                {
+                    id: user.id,
+                    user_id: user.id,
+                    user_email: user.email,
+                    user_name: user.username,
+                    user_role: user.role
+                },
                 auth_secret,
-                { expiresIn: "1d" })
+                { expiresIn: "7d" })
 
             if (!token) {
                 return res.status(400).json(response(400, "Validasi Error", "Login failed"))
-
             }
+            
             const formatData = {
                 data: {
                     id: user.id,
-                    name: user.name,
+                    username: user.username,
                     email: user.email
                 },
                 token: token
@@ -62,28 +68,28 @@ module.exports = {
             return res.status(200).json(response(200, "Login Berhasil", formatData))
 
         } catch (error) {
-            return res.status(500).json(response(500, "Error Server", error.message))
+            return res.status(500).json(response(500, "Error Server", error.message + " - " + JSON.stringify(req.body)))
         }
     },
     register: async (req, res) => {
         try {
-            const { name, email, password } = req.body;
+            const { username, email, password } = req.body;
 
             const schema = {
-                name: { type: "string", min: 1, empty: false },
+                username: { type: "string", min: 1, empty: false },
                 email: { type: "email" },
                 password: { type: "string", min: 6, empty: false }
             }
 
             const data = {
-                name: name,
+                username: username,
                 email: email,
                 password: password
             }
 
             const validate = v.validate(data, schema);
 
-            if (!validate) {
+            if (validate.length > 0) {
                 return res.status(400).json(response(400, "Validasi Error", validate))
             }
 
@@ -98,15 +104,16 @@ module.exports = {
             const hashedPassword = passwordHash.generate(password);
 
             const newUser = await User.create({
-                name: name,
+                username: username,
                 email: email,
-                password: hashedPassword
+                password: hashedPassword,
+                role: "user"
             });
 
             return res.status(201).json(response(201, "Register Berhasil"))
 
         } catch (error) {
-            return res.status(500).json(response(500, "Error Server", error.message))
+            return res.status(500).json(response(500, "Error Server", error.message + " - " + JSON.stringify(req.body)))
         }
     }
 }

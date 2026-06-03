@@ -14,15 +14,13 @@ module.exports = (sequelize, DataTypes) => {
       Post.belongsTo(models.User,
         { foreignKey: 'user_id' }
       );
-      Post.belongsTo(models.Community,
-        { foreignKey: 'community_id' }
-      );
+      Post.hasMany(models.Comment, { foreignKey: 'post_id' });
+      Post.hasMany(models.Like, { foreignKey: 'post_id' });
     }
   }
   Post.init({
     user_id: DataTypes.INTEGER,
-    community_id: DataTypes.INTEGER,
-    type: DataTypes.ENUM('community', 'personal'),
+    type: DataTypes.ENUM('public', 'private'),
     content: DataTypes.STRING,
     image: DataTypes.STRING
   }, {

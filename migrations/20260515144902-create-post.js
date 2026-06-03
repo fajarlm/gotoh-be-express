@@ -12,11 +12,8 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER
       },
-      community_id: {
-        type: Sequelize.INTEGER
-      },
       type: {
-        type: Sequelize.ENUM('community', 'personal')
+        type: Sequelize.ENUM('public', 'private')
       },
       content: {
         type: Sequelize.STRING
@@ -44,17 +41,7 @@ module.exports = {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE'
     });
-    queryInterface.addConstraint('Posts', {
-      fields: ['community_id'],
-      type: 'foreign key',
-      name: 'fk_posts_community_id',
-      references: {
-        table: 'Communities',
-        field: 'id'
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
-    }); 
+   
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Posts');

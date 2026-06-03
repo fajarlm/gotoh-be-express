@@ -22,7 +22,11 @@ module.exports = (sequelize, DataTypes) => {
   Community_Members.init({
     user_id: DataTypes.INTEGER,
     community_id: DataTypes.INTEGER,
-    joined_at: DataTypes.DATE
+    joined_at: DataTypes.DATE,
+    role: {
+      type: DataTypes.ENUM('admin', 'member'),
+      defaultValue: 'member'
+    }
   }, {
     sequelize,
     modelName: 'Community_Members',

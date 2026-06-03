@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Group_Chat extends Model {
+  class medical_checkup extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,20 +11,21 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Group_Chat.belongsTo(models.User,
-        { foreignKey: 'user_id' }
-      );
-      Group_Chat.belongsTo(models.Community,
-        { foreignKey: 'community_id' }
-       );
+      medical_checkup.belongsTo(models.User, { foreignKey: 'user_id' });
     }
   }
-  Group_Chat.init({
+  medical_checkup.init({
     user_id: DataTypes.INTEGER,
-    community_id: DataTypes.INTEGER
+    date: DataTypes.DATE,
+    blood_pressure: DataTypes.STRING,
+    heart_rate: DataTypes.INTEGER,
+    blood_sugar: DataTypes.FLOAT,
+    cholesterol: DataTypes.FLOAT,
+    weight: DataTypes.FLOAT,
+    height: DataTypes.FLOAT,
   }, {
     sequelize,
-    modelName: 'Group_Chat',
+    modelName: 'medical_checkup',
   });
-  return Group_Chat;
+  return medical_checkup;
 };

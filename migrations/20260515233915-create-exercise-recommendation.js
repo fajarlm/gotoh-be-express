@@ -10,7 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       bmi_category: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       recommendation: {
         type: Sequelize.TEXT

@@ -17,15 +17,17 @@ module.exports = (sequelize, DataTypes) => {
       User.belongsToMany(models.Community,
          { through: models.Community_Members, foreignKey: 'user_id' }
       );
+      User.hasMany(models.Comment, { foreignKey: 'user_id' });
+      User.hasMany(models.Like, { foreignKey: 'user_id' });
+      User.hasMany(models.Chat_Message, { foreignKey: 'user_id' });
+      User.hasMany(models.medical_checkup, { foreignKey: 'user_id' });
 
     }
   }
   User.init({
-    name: DataTypes.STRING,
+    username: DataTypes.STRING,
     email: DataTypes.STRING,
     password: DataTypes.STRING,
-    weight: DataTypes.FLOAT,
-    height: DataTypes.FLOAT,
     health_target: DataTypes.ENUM('menurunkan_berat_badan', 'gaya_hidup_sehat', 'membangun_otot'),
     avatar: DataTypes.STRING,
     role: DataTypes.ENUM('user', 'admin'),

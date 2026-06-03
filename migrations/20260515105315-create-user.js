@@ -9,7 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      username: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -22,17 +22,13 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      weight: {
-        type: Sequelize.FLOAT
-      },
-      height: {
-        type: Sequelize.FLOAT
-      },
       health_target: {
-        type: Sequelize.ENUM('menurunkan_berat_badan', 'gaya_hidup_sehat', 'membangun_otot')
+        type: Sequelize.ENUM('menurunkan_berat_badan', 'gaya_hidup_sehat', 'membangun_otot'),
+        allowNull: true
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       role: {
         type: Sequelize.ENUM('user', 'admin'),

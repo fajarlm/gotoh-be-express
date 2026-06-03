@@ -1,53 +1,41 @@
-const Validator = require("fastest-validator");
-const v = new Validator();
-const { Chat_Message, } = require("../models")
+const { Chat_Message, User } = require("../models");
 const { response } = require("../helpers/response.formatter");
-const passwordHash = require('password-hash')
-const { auth_secret } = require('../config/base.config')
-const jwt = require('jsonwebtoken')
-const { Op } = require("sequelize");
 
 module.exports = {
-    chatMessageController: async (io) => {
-        io.on('connection', (socket) => {
-
-            console.log(socket.id);
-
-            // join group
-            socket.on('join_group', async (data) => {
-
-                socket.join(
-                    `group-${data.groupId}`
-                );
-
+    getMessages: async (req, res) => {
+        try {
+            const { community_id } = req.params;
+            const messages = await Chat_Message.findAll({
+                where: {
+                    community_id: community_id
+                },
+                include: [
+                    { model: User, attributes: ['id', 'username', 'avatar'] }
+                ],
+                order: [['createdAt', 'ASC']]
             });
 
-            // kirim chat
-            socket.on(
-                'send_message',
-                async (data) => {
+            return res.status(200).json(response(200, "Messages retrieved successfully", messages));
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", error.message));
+        }
+    },
+    createMessage: async (req, res) => {
+        try {
+            const { message } = req.body;
+            const { community_id } = req.params;
+            const image_message = req.file ? req.file.filename : null;
 
-                    // simpan DB
-                    const message =
-                        await ChatMessage.create({
+            const newMessage = await Chat_Message.create({
+                user_id: req.user.id,
+                community_id: community_id,
+                message: message,
+                image_message: image_message
+            });
 
-                            groupId: data.groupId,
-                            userId: data.userId,
-                            message: data.message
-
-                        });
-
-                    // realtime
-                    io.to(
-                        `group-${data.groupId}`
-                    ).emit(
-                        'receive_message',
-                        message
-                    );
-
-                }
-            );
-
-        });
+            return res.status(201).json(response(201, "Message sent successfully", newMessage));
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", error.message));
+        }
     }
 }

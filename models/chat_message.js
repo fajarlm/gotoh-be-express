@@ -14,15 +14,15 @@ module.exports = (sequelize, DataTypes) => {
       Chat_Message.belongsTo(models.User,
         { foreignKey: 'user_id' }
       );
-      Chat_Message.belongsTo(models.Group_Chat,
-        { foreignKey: 'group_chat_id' }
+      Chat_Message.belongsTo(models.Community,
+        { foreignKey: 'community_id' }
       );
     }
   }
   Chat_Message.init({
     user_id: DataTypes.INTEGER,
-    group_chat_id: DataTypes.INTEGER,
     message: DataTypes.TEXT,
+    community_id: DataTypes.INTEGER,
     image_message: DataTypes.STRING,
     is_read: { 
       type: DataTypes.BOOLEAN, 

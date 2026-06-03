@@ -18,7 +18,7 @@ module.exports = {
                 include: [{
                     model: User,
                     where: name ? {
-                        name: { [Op.like]: `%${name}%` }
+                        username: { [Op.like]: `%${name}%` }
                     } : {}
                 }],
                 order: sortBy && order ? [[sortBy, order]] : [],

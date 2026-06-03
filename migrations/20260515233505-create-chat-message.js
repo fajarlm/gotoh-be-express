@@ -12,7 +12,7 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER
       },
-      group_chat_id: {
+      community_id: {
         type: Sequelize.INTEGER
       },
       message: {
@@ -46,11 +46,11 @@ module.exports = {
       onUpdate: 'CASCADE'
     });
     queryInterface.addConstraint('Chat_Messages', {
-      fields: ['group_chat_id'],
+      fields: ['community_id'],
       type: 'foreign key',
-      name: 'fk_chat_messages_group_chat_id',
+      name: 'fk_chat_messages_community_id',
       references: {
-        table: 'Group_Chats',
+        table: 'Communities',
         field: 'id'
       },
       onDelete: 'CASCADE',
