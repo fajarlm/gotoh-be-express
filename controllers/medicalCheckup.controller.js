@@ -1,6 +1,6 @@
 const Validator = require("fastest-validator");
 const v = new Validator();
-const { medical_checkup } = require("../models");
+const { medical_checkup,User } = require("../models");
 const { response } = require("../helpers/response.formatter");
 
 module.exports = {
@@ -54,7 +54,7 @@ module.exports = {
                 where: whereClause,
                 include: [
                     {
-                        model: require("../models").User,
+                        model: User.User,
                         attributes: ['id', 'username', 'avatar']
                     }
                 ],

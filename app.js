@@ -6,6 +6,8 @@ const { Server } = require("socket.io");
 const port = 3001;
 const methodOverride = require("method-override");
 const db = require("./models");
+cors = require("cors");
+app.use(cors());
 
 const authRoutes = require("./routes/auth.routes");
 const medicalCheckupRoutes = require("./routes/medical_checkup.route");
@@ -65,7 +67,6 @@ server.listen(port, () => {
     console.log(`Server running at port ${port}`);
 
 });
-
 
 // export agar bisa dipakai file lain
 module.exports = {
