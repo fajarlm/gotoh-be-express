@@ -47,7 +47,24 @@ module.exports = {
             const offset = (pageNum - 1) * limitNum;
             
             const whereClause = {};
-            if (type) whereClause.type = type;
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
+
+            if (userRole !== 'admin') {
+                if (type === 'public') {
+                    whereClause.type = 'public';
+                } else if (type === 'private') {
+                    whereClause.type = 'private';
+                    whereClause.user_id = userId;
+                } else {
+                    whereClause[Op.or] = [
+                        { type: 'public' },
+                        { type: 'private', user_id: userId }
+                    ];
+                }
+            } else {
+                if (type) whereClause.type = type;
+            }
 
             const { rows, count } = await Post.findAndCountAll({
                 where: whereClause,

@@ -60,11 +60,20 @@ module.exports = {
     updateCommunity: async (req, res) => {
         try {
             const { id } = req.params;
-
             const { name, description, location } = req.body;
             const cover = req.file?.filename;
 
             const community = await Community.findByPk(id);
+            if (!community) {
+                return res.status(404).json(response(404, "Error", "Community not found"));
+            }
+
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
+
+            if (userRole !== 'admin' && community.created_by !== userId) {
+                return res.status(403).json(response(403, "Forbidden", "You do not have permission to update this community"));
+            }
 
             const schema = {
                 name: { type: "string", min: 3 ,optional: true},
@@ -94,9 +103,9 @@ module.exports = {
             }
 
             await Community.update({
-                name: name,
-                description: description,
-                location: location,
+                name: name || community.name,
+                description: description || community.description,
+                location: location || community.location,
                 cover_image: (req.file ? req.file.filename : community.getDataValue("cover_image"))
             },
                 { where: { id: id } }
@@ -104,8 +113,9 @@ module.exports = {
 
             const updatedCommunity = await Community.findByPk(id);
 
-            return res.status(201).json(response(201, "Community updated successfully", updatedCommunity));
+            return res.status(200).json(response(200, "Community updated successfully", updatedCommunity));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while updating community"));
         }
     },
@@ -137,19 +147,39 @@ module.exports = {
     deleteCommunity: async (req, res) => {
         try {
             const { id } = req.params;
-            const community = await Community.destroy({
-                where: { id: id }
-            });
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
 
-            return res.status(204).json(response(204, "Community deleted successfully", community));
+            const community = await Community.findByPk(id);
+            if (!community) {
+                return res.status(404).json(response(404, "Error", "Community not found"));
+            }
+
+            if (userRole !== 'admin' && community.created_by !== userId) {
+                return res.status(403).json(response(403, "Forbidden", "You do not have permission to delete this community"));
+            }
+
+            const coverImage = community.cover_image;
+            if (coverImage) {
+                const filePath = path.join(__dirname, "../uploads", coverImage);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            }
+
+            await community.destroy();
+
+            return res.status(200).json(response(200, "Community deleted successfully", null));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while deleting community"));
         }
     },
     getCommunity: async (req, res) => {
         try {
             const { name, sortBy, order, limit, page } = req.query;
-            const offset = Number(page - 1) * Number(limit);
+            const limitNum = limit ? Number(limit) : 10;
+            const pageNum = page ? Number(page) : 1;
+            const offset = (pageNum - 1) * limitNum;
+
             const { rows, count } = await Community.findAndCountAll({
                 include: [{
                     model: User,
@@ -160,8 +190,8 @@ module.exports = {
                 } : {},
 
                 order: sortBy && order ? [[sortBy, order]] : [],
-                limit: Number(limit),
-                offset: Number(offset)
+                limit: limitNum,
+                offset: offset
             });
 
             const updatedRows = await Promise.all(rows.map(async (community) => {
@@ -176,14 +206,15 @@ module.exports = {
 
             const formatPagination = {
                 data: updatedRows,
-                limit: limit,
-                rows: Number(offset + 1) + "-" + (Number(offset) + rows.length),
+                limit: limitNum,
+                rows: (offset + 1) + "-" + (offset + rows.length),
                 total: count,
-                page: page
+                page: pageNum
             }
 
             return res.status(200).json(response(200, "Community retrieved successfully", formatPagination));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while retrieving community"));
         }
     },
@@ -195,6 +226,12 @@ module.exports = {
             if (!community) {
                 return res.status(404).json(response(404, "Error", "Community not found"));
             }
+
+            const is_member = await community.hasUser(req.user.id);
+            if (is_member) {
+                return res.status(400).json(response(400, "Error", "You have already joined this community"));
+            }
+
             await community.addUser(
                 req.user.id,
                 {
@@ -206,6 +243,7 @@ module.exports = {
             );
             return res.status(200).json(response(200, "Success", community));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while joining community"));
         }
     },
@@ -218,10 +256,16 @@ module.exports = {
                 return res.status(404).json(response(404, "Error", "Community not found"));
             }
 
+            const is_member = await community.hasUser(req.user.id);
+            if (!is_member) {
+                return res.status(400).json(response(400, "Error", "You are not a member of this community"));
+            }
+
             await community.removeUser(req.user.id);
 
-            return res.status(204).json(response(204, "Success", "Left community successfully"));
+            return res.status(200).json(response(200, "Success", "Left community successfully"));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while leaving community"));
         }
     }

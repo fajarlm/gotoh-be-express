@@ -46,15 +46,21 @@ module.exports = {
     getCheckups: async (req, res) => {
         try {
             const { user_id } = req.query;
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
             
             const whereClause = {};
-            if (user_id) whereClause.user_id = user_id;
+            if (userRole !== 'admin') {
+                whereClause.user_id = userId;
+            } else if (user_id) {
+                whereClause.user_id = user_id;
+            }
 
             const checkups = await medical_checkup.findAll({
                 where: whereClause,
                 include: [
                     {
-                        model: User.User,
+                        model: User,
                         attributes: ['id', 'username', 'avatar']
                     }
                 ],
@@ -63,36 +69,60 @@ module.exports = {
 
             return res.status(200).json(response(200, "Medical checkups retrieved successfully", checkups));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while retrieving checkups"));
         }
     },
     getCheckupById: async (req, res) => {
         try {
             const { id } = req.params;
-            const checkup = await medical_checkup.findByPk(id);
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
+
+            const checkup = await medical_checkup.findByPk(id, {
+                include: [
+                    {
+                        model: User,
+                        attributes: ['id', 'username', 'avatar']
+                    }
+                ]
+            });
 
             if (!checkup) {
                 return res.status(404).json(response(404, "Error", "Medical checkup not found"));
             }
 
+            if (userRole !== 'admin' && checkup.user_id !== userId) {
+                return res.status(403).json(response(403, "Forbidden", "You do not have permission to view this checkup"));
+            }
+
             return res.status(200).json(response(200, "Medical checkup retrieved successfully", checkup));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while retrieving checkup"));
         }
     },
     deleteCheckup: async (req, res) => {
         try {
             const { id } = req.params;
+            const userRole = req.user?.user_role || req.user?.role;
+            const userId = req.user?.id || req.user?.user_id;
+
             const checkup = await medical_checkup.findByPk(id);
 
             if (!checkup) {
                 return res.status(404).json(response(404, "Error", "Medical checkup not found"));
             }
 
+            if (userRole !== 'admin' && checkup.user_id !== userId) {
+                return res.status(403).json(response(403, "Forbidden", "You do not have permission to delete this checkup"));
+            }
+
             await medical_checkup.destroy({ where: { id } });
 
             return res.status(200).json(response(200, "Medical checkup deleted successfully", null));
         } catch (error) {
+            console.error(error);
             return res.status(500).json(response(500, "Error", "An error occurred while deleting checkup"));
         }
     }
