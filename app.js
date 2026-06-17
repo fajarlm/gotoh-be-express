@@ -63,15 +63,24 @@ const io = new Server(server, {
 // menjalankan semua event socket
 chatSocket(io);
 
-// menjalankan server express + socket
+// menjalankan server express + socket jika tidak di Vercel
+if (!process.env.VERCEL) {
+    server.listen(port, () => {
+        console.log(`Server running at port ${port}`);
+    });
+}
+
+// export app agar Vercel Node handler bisa membaca routing Express
+module.exports = app;
+
+/* 
+// Code sebelumnya (sebelum deploy ke Vercel):
 server.listen(port, () => {
-
     console.log(`Server running at port ${port}`);
-
 });
 
-// export agar bisa dipakai file lain
 module.exports = {
     io,
     server
 };
+*/
