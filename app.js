@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const port = 3001;
 const methodOverride = require("method-override");
 const db = require("./models");
-cors = require("cors");
+const cors = require("cors");
 const compression = require('compression');
 app.use(cors());
 app.use(compression());
