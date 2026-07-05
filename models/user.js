@@ -31,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
     health_target: DataTypes.ENUM('menurunkan_berat_badan', 'gaya_hidup_sehat', 'membangun_otot'),
     avatar: DataTypes.STRING,
     role: DataTypes.ENUM('user', 'admin'),
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'active' // 'active', 'suspended'
+    }
   }, {
     sequelize,
     modelName: 'User',

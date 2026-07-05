@@ -22,7 +22,11 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.INTEGER,
     type: DataTypes.ENUM('public', 'private'),
     content: DataTypes.STRING,
-    image: DataTypes.STRING
+    image: DataTypes.STRING,
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'pending' // 'pending', 'approved', 'rejected'
+    }
   }, {
     sequelize,
     modelName: 'Post',

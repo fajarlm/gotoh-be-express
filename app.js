@@ -26,8 +26,20 @@ const {checkToken} = require("./middleware/auth");
 
 // mengecek apakah koneksi database berhasil
 db.sequelize.authenticate()
-.then(() => {
+.then(async () => {
     console.log("Database connected");
+    try {
+        await db.sequelize.query(`ALTER TABLE "Posts" ADD COLUMN IF NOT EXISTS "status" VARCHAR(255) DEFAULT 'pending';`);
+        console.log("Post status column verified/added");
+    } catch(e) {
+        console.log("Post status migration error:", e.message);
+    }
+    try {
+        await db.sequelize.query(`ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "status" VARCHAR(255) DEFAULT 'active';`);
+        console.log("User status column verified/added");
+    } catch(e) {
+        console.log("User status migration error:", e.message);
+    }
 })
 .catch((err) => {
     console.log(err);
