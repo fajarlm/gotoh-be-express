@@ -12,8 +12,12 @@ module.exports = {
         try {
             const { id } = req.params;
             const { name, sortBy, order, limit, page } = req.query;
-            const offset = Number(page - 1) * Number(limit);
-            const { rows, count } = await Community_Members.findAndCountAll({
+
+            const limitNum = limit ? Number(limit) : undefined;
+            const pageNum = page ? Number(page) : undefined;
+            const offset = (limitNum && pageNum) ? (pageNum - 1) * limitNum : undefined;
+
+            const queryOptions = {
                 where: { community_id: id },
                 include: [{
                     model: User,
@@ -22,16 +26,21 @@ module.exports = {
                     } : {}
                 }],
                 order: sortBy && order ? [[sortBy, order]] : [],
-                limit: Number(limit),
-                offset: Number(offset)
-            });
+            };
+
+            if (limitNum !== undefined && !isNaN(limitNum)) queryOptions.limit = limitNum;
+            if (offset !== undefined && !isNaN(offset)) queryOptions.offset = offset;
+
+            const { rows, count } = await Community_Members.findAndCountAll(queryOptions);
 
             const formatPagination = {
                 data: rows,
-                limit: limit,
-                rows: Number(offset + 1) + "-" + (Number(offset) + rows.length),
+                limit: limitNum || count,
+                rows: offset !== undefined && !isNaN(offset) 
+                    ? (Number(offset + 1) + "-" + (Number(offset) + rows.length)) 
+                    : (rows.length > 0 ? `1-${rows.length}` : "0-0"),
                 total: count,
-                page: page
+                page: pageNum || 1
             }
 
             return res.status(200).json(response(200, "Community members retrieved successfully", formatPagination));
