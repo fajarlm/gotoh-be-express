@@ -4,11 +4,7 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+    // Helper method for defining associations.
     static associate(models) {
       // define association here
       User.hasMany(models.Post, 
@@ -31,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
     health_target: DataTypes.ENUM('menurunkan_berat_badan', 'gaya_hidup_sehat', 'membangun_otot'),
     avatar: DataTypes.STRING,
     role: DataTypes.ENUM('user', 'admin'),
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'active' // 'active', 'suspended'
+    }
   }, {
     sequelize,
     modelName: 'User',

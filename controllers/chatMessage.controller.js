@@ -22,8 +22,8 @@ module.exports = {
     },
     createMessage: async (req, res) => {
         try {
-            const { message } = req.body;
-            const { community_id } = req.params;
+            const { message, community_id: bodyCommunityId } = req.body;
+            const community_id = bodyCommunityId || req.params.community_id;
             const image_message = req.file ? req.file.filename : null;
 
             const newMessage = await Chat_Message.create({

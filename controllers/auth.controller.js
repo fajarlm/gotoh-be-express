@@ -35,6 +35,10 @@ module.exports = {
                 return res.status(400).json(response(400, "Validasi Error", "Email Not Found. Try Again"))
             }
 
+            if (user.status === 'suspended') {
+                return res.status(403).json(response(403, "Akses Ditolak", "Akun Anda telah ditangguhkan (suspended) oleh admin."))
+            }
+
             const checkPassword = passwordHash.verify(password, user.password)
 
             if (!checkPassword) {

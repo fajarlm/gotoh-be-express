@@ -13,6 +13,13 @@ module.exports = {
         try {
             token = token.replace("Bearer ", "")
             const check = jwt.verify(token, auth_secret)
+            
+            const { User } = require("../models");
+            const dbUser = await User.findByPk(check.id);
+            if (!dbUser || dbUser.status === 'suspended') {
+                return res.status(401).json(response(401, "unauthorized", "Akun Anda ditangguhkan atau tidak ditemukan"));
+            }
+
             req.user = check;
 
             next();

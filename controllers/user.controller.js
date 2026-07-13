@@ -174,5 +174,27 @@ module.exports = {
         } catch (error) {
             return res.status(500).json(response(500, "Error", "An error occurred while deleting user"))
         }
+    },
+    updateUserStatus: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json(response(404, "Error", "User not found"));
+            }
+
+            if (!['active', 'suspended'].includes(status)) {
+                return res.status(400).json(response(400, "Validation Error", "Invalid status value. Must be 'active' or 'suspended'"));
+            }
+
+            await User.update({ status }, { where: { id } });
+
+            const updatedUser = await User.findByPk(id);
+            return res.status(200).json(response(200, "User status updated successfully", updatedUser));
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", "An error occurred while updating user status"));
+        }
     }
 }

@@ -8,6 +8,7 @@ router.get('/', authMiddleware.checkAdmin, userController.getUsers)
 router.get('/profile', userController.getProfile)
 router.put('/profile', upload.single('avatar'), userController.updateProfile)
 router.get('/profile/:id', userController.showUser)
+router.put('/profile/:id/status', authMiddleware.checkAdmin, userController.updateUserStatus)
 router.delete('/profile/:id', authMiddleware.checkAdmin, userController.deleteUser)
 
 module.exports = router

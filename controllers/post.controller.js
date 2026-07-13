@@ -41,7 +41,7 @@ module.exports = {
     },
     getPosts: async (req, res) => {
         try {
-            const { type, limit, page } = req.query;
+            const { type, status, limit, page } = req.query;
             const limitNum = limit ? Number(limit) : 10;
             const pageNum = page ? Number(page) : 1;
             const offset = (pageNum - 1) * limitNum;
@@ -51,19 +51,32 @@ module.exports = {
             const userId = req.user?.id || req.user?.user_id;
 
             if (userRole !== 'admin') {
+                const visibilityCondition = [
+                    { status: 'approved' },
+                    { user_id: userId }
+                ];
                 if (type === 'public') {
                     whereClause.type = 'public';
+                    whereClause[Op.or] = visibilityCondition;
                 } else if (type === 'private') {
                     whereClause.type = 'private';
                     whereClause.user_id = userId;
                 } else {
-                    whereClause[Op.or] = [
-                        { type: 'public' },
-                        { type: 'private', user_id: userId }
+                    whereClause[Op.and] = [
+                        {
+                            [Op.or]: [
+                                { type: 'public' },
+                                { type: 'private', user_id: userId }
+                            ]
+                        },
+                        {
+                            [Op.or]: visibilityCondition
+                        }
                     ];
                 }
             } else {
                 if (type) whereClause.type = type;
+                if (status) whereClause.status = status;
             }
 
             const { rows, count } = await Post.findAndCountAll({
@@ -171,6 +184,32 @@ module.exports = {
             return res.status(200).json(response(200, "Post deleted successfully", null));
         } catch (error) {
             return res.status(500).json(response(500, "Error", "An error occurred while deleting post"));
+        }
+    },
+    updatePostStatus: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const post = await Post.findByPk(id);
+            if (!post) {
+                return res.status(404).json(response(404, "Error", "Post not found"));
+            }
+
+            if (!['approved', 'rejected', 'pending'].includes(status)) {
+                return res.status(400).json(response(400, "Validation Error", "Invalid status. Must be 'approved', 'rejected', or 'pending'"));
+            }
+
+            await Post.update({ status }, { where: { id } });
+
+            const updatedPost = await Post.findByPk(id, {
+                include: [
+                    { model: User, attributes: ['id', 'username', 'avatar'] }
+                ]
+            });
+            return res.status(200).json(response(200, "Post status updated successfully", updatedPost));
+        } catch (error) {
+            return res.status(500).json(response(500, "Error", "An error occurred while updating post status"));
         }
     }
 };
