@@ -1,15 +1,9 @@
--- ============================================================
--- GOTOH - Supabase PostgreSQL Schema
--- Generated from Sequelize migrations
--- Run this script in Supabase SQL Editor (in order)
--- ============================================================
+-- GOTOH - Supabase PostgreSQL Schema (Generated from Sequelize migrations, run in Supabase SQL Editor in order)
 
 -- Enable UUID extension (optional, kita pakai SERIAL/BIGSERIAL)
 -- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ============================================================
 -- 1. ENUM TYPES
--- ============================================================
 
 CREATE TYPE health_target_enum AS ENUM (
   'menurunkan_berat_badan',
@@ -25,9 +19,7 @@ CREATE TYPE post_type_enum AS ENUM ('public', 'private');
 
 CREATE TYPE community_member_role_enum AS ENUM ('admin', 'member');
 
--- ============================================================
 -- 2. TABLE: Users
--- ============================================================
 
 CREATE TABLE "Users" (
   id            SERIAL PRIMARY KEY,
@@ -41,9 +33,7 @@ CREATE TABLE "Users" (
   "updatedAt"   TIMESTAMPTZ         NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 3. TABLE: Communities
--- ============================================================
 
 CREATE TABLE "Communities" (
   id          SERIAL PRIMARY KEY,
@@ -58,9 +48,7 @@ CREATE TABLE "Communities" (
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 4. TABLE: Community_Members
--- ============================================================
 
 CREATE TABLE "Community_Members" (
   id           SERIAL PRIMARY KEY,
@@ -72,9 +60,7 @@ CREATE TABLE "Community_Members" (
   "updatedAt"  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 5. TABLE: Posts
--- ============================================================
 
 CREATE TABLE "Posts" (
   id          SERIAL PRIMARY KEY,
@@ -86,9 +72,7 @@ CREATE TABLE "Posts" (
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 6. TABLE: Comments
--- ============================================================
 
 CREATE TABLE "Comments" (
   id          SERIAL PRIMARY KEY,
@@ -99,9 +83,7 @@ CREATE TABLE "Comments" (
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 7. TABLE: Likes
--- ============================================================
 
 CREATE TABLE "Likes" (
   id          SERIAL PRIMARY KEY,
@@ -111,9 +93,7 @@ CREATE TABLE "Likes" (
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 8. TABLE: Chat_Messages
--- ============================================================
 
 CREATE TABLE "Chat_Messages" (
   id            SERIAL PRIMARY KEY,
@@ -126,9 +106,7 @@ CREATE TABLE "Chat_Messages" (
   "updatedAt"   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 9. TABLE: exercise_recommendations
--- ============================================================
 
 CREATE TABLE "exercise_recommendations" (
   id             SERIAL PRIMARY KEY,
@@ -139,9 +117,7 @@ CREATE TABLE "exercise_recommendations" (
   "updatedAt"    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 10. TABLE: medical_checkups
--- ============================================================
 
 CREATE TABLE "medical_checkups" (
   id             SERIAL PRIMARY KEY,
@@ -157,9 +133,7 @@ CREATE TABLE "medical_checkups" (
   "updatedAt"    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
 -- 11. INDEXES (opsional, untuk performa query)
--- ============================================================
 
 CREATE INDEX idx_communities_created_by     ON "Communities"(created_by);
 CREATE INDEX idx_community_members_user_id  ON "Community_Members"(user_id);
@@ -173,9 +147,7 @@ CREATE INDEX idx_chat_messages_user_id      ON "Chat_Messages"(user_id);
 CREATE INDEX idx_chat_messages_community_id ON "Chat_Messages"(community_id);
 CREATE INDEX idx_medical_checkups_user_id   ON "medical_checkups"(user_id);
 
--- ============================================================
 -- 12. Row Level Security (RLS) - Aktifkan sesuai kebutuhan
--- ============================================================
 -- Uncomment jika ingin menggunakan RLS Supabase
 
 -- ALTER TABLE "Users" ENABLE ROW LEVEL SECURITY;
@@ -188,6 +160,4 @@ CREATE INDEX idx_medical_checkups_user_id   ON "medical_checkups"(user_id);
 -- ALTER TABLE "exercise_recommendations" ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE "medical_checkups" ENABLE ROW LEVEL SECURITY;
 
--- ============================================================
 -- SELESAI
--- ============================================================
