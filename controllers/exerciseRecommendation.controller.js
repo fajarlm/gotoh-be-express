@@ -1,32 +1,62 @@
 const Validator = require("fastest-validator");
 const v = new Validator();
-const { exercise_recommendation } = require("../models");
+const { exercise_recommendation, User } = require("../models");
 const { response } = require("../helpers/response.formatter");
 
-// Static exercise recommendations based on BMI category
+// Personalized exercise recommendations based on BMI category + health_target
 const staticRecommendations = {
     "Underweight": {
-        recommendation: "Focus on strength training exercises to build muscle mass. Include weight-bearing exercises like resistance training, push-ups, and weight lifting. Combine with balanced nutrition to support muscle development.",
-        duration: 60
+        recommendation: "Fokus pada latihan kekuatan (strength training) untuk membangun massa otot: push-up, squat, resistance band, dan angkat beban ringan. Imbangi dengan asupan kalori & protein berkualitas.",
+        duration: 45
     },
     "Normal": {
-        recommendation: "Maintain your fitness with a mix of cardio and strength training. Perform 150 minutes of moderate-intensity aerobic activity per week, combined with muscle-strengthening activities 2 days per week.",
+        recommendation: "Pertahankan kebugaran dengan kombinasi kardio dan latihan kekuatan. Lakukan 150 menit aktivitas aerobik intensitas sedang per minggu ditambah latihan otot 2 hari per minggu.",
         duration: 45
     },
     "Overweight": {
-        recommendation: "Start with low-impact cardio exercises like walking, swimming, or cycling. Gradually incorporate strength training. Aim for 30-45 minutes of exercise, 5 days per week. Focus on consistency rather than intensity.",
-        duration: 45
+        recommendation: "Mulai dengan kardio low-impact seperti jalan cepat, berenang, atau bersepeda 30-45 menit sebanyak 5x seminggu. Tambahkan latihan beban ringan 2x seminggu untuk menjaga metabolisme.",
+        duration: 40
     },
     "Obese": {
-        recommendation: "Begin with gentle, low-impact exercises such as walking or water aerobics. Start with 20-30 minutes, 3-4 times per week. Gradually increase duration and intensity. Consult with a healthcare provider before starting any exercise program.",
+        recommendation: "Awali dengan gerakan low-impact ramah sendi seperti jalan santai, sepeda statis, atau senam air selama 20-30 menit, 3-4x seminggu. Tingkatkan durasi bertahap sesuai kenyamanan tubuh.",
         duration: 30
     }
 };
 
+function buildPersonalizedRecommendation({ bmi_category, health_target, blood_pressure, blood_sugar }) {
+    const base = staticRecommendations[bmi_category] || staticRecommendations["Normal"];
+    let rec = base.recommendation;
+    let duration = base.duration;
+
+    if (health_target === 'menurunkan_berat_badan') {
+        rec += " | Target Penurunan BB: Prioritaskan zona pembakaran lemak (jalan cepat/bersepeda konstan) dan defisit kalori terukur.";
+        duration = Math.max(duration, 45);
+    } else if (health_target === 'membangun_otot') {
+        rec += " | Target Massa Otot: Utamakan progressive overload 3-4x/minggu dengan istirahat cukup dan asupan protein ~1.6g/kg BB.";
+        duration = Math.max(duration, 50);
+    } else if (health_target === 'gaya_hidup_sehat') {
+        rec += " | Target Gaya Hidup Sehat: Jaga konsistensi harian, sisipkan peregangan 10 menit dan aktivitas luar ruang.";
+    }
+
+    if (blood_pressure && typeof blood_pressure === 'string' && blood_pressure.includes('/')) {
+        const sys = parseInt(blood_pressure.split('/')[0], 10);
+        if (!isNaN(sys) && sys >= 140) {
+            rec += " | Catatan Tekanan Darah: Hindari latihan menahan napas (Valsalva) atau HIIT berat; pilih jalan santai & pernapasan teratur.";
+            duration = Math.min(duration, 30);
+        }
+    }
+
+    if (blood_sugar && Number(blood_sugar) >= 200) {
+        rec += " | Catatan Gula Darah: Lakukan olahraga ringan setelah makan (jalan kaki 15-20 menit) dan pantau hidrasi.";
+    }
+
+    return { recommendation: rec, duration };
+}
+
 module.exports = {
     createRecommendation: async (req, res) => {
         try {
-            const { bmi_category, duration, goals, age, gender } = req.body;
+            const { bmi_category, duration, goals, age, gender, blood_pressure, blood_sugar } = req.body;
 
             const schema = {
                 bmi_category: { type: "string", min: 1, empty: false },
@@ -49,12 +79,23 @@ module.exports = {
                 return res.status(400).json(response(400, "Validation Error", validate));
             }
 
-            const generated = staticRecommendations[data.bmi_category] || staticRecommendations["Normal"];
+            let userTarget = goals;
+            if (!userTarget && req.user?.id) {
+                const user = await User.findByPk(req.user.id, { attributes: ['health_target'] });
+                userTarget = user?.health_target;
+            }
+
+            const generated = buildPersonalizedRecommendation({
+                bmi_category: data.bmi_category,
+                health_target: userTarget,
+                blood_pressure,
+                blood_sugar
+            });
 
             const rec = await exercise_recommendation.create({
                 bmi_category: data.bmi_category,
                 recommendation: generated.recommendation,
-                duration: generated.duration
+                duration: data.duration || generated.duration
             });
 
             return res.status(201).json(response(201, "Recommendation created successfully", rec));

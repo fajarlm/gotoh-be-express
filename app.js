@@ -21,6 +21,10 @@ const chatMessageRoutes = require("./routes/chatMessage.routes");
 const exerciseRecommendationRoutes = require("./routes/exerciseRecommendation.routes");
 const communityMembersRoutes = require("./routes/communityMembers.routes");
 const communityRoutes = require("./routes/community.routes");
+const workoutRoutes = require("./routes/workout.routes");
+const reportRoutes = require("./routes/report.routes");
+const articleRoutes = require("./routes/article.routes");
+const challengeRoutes = require("./routes/challenge.routes");
 const chatSocket = require("./sockets/chat.socket");
 const {checkToken} = require("./middleware/auth");
 
@@ -39,6 +43,18 @@ db.sequelize.authenticate()
         console.log("User status column verified/added");
     } catch(e) {
         console.log("User status migration error:", e.message);
+    }
+    try {
+        await Promise.all([
+            db.Workout_Log?.sync(),
+            db.Post_Report?.sync(),
+            db.Article?.sync(),
+            db.Challenge?.sync(),
+            db.Challenge_Participant?.sync(),
+        ]);
+        console.log("Extended feature tables verified/synced");
+    } catch (e) {
+        console.log("Extended tables sync error:", e.message);
     }
 })
 .catch((err) => {
@@ -64,6 +80,10 @@ app.use('/exercise-recommendations', checkToken, exerciseRecommendationRoutes);
 app.use('/community-members', checkToken, communityMembersRoutes);
 app.use('/communities', checkToken, communityRoutes);
 app.use('/medical-checkup', checkToken, medicalCheckupRoutes);
+app.use('/workouts', checkToken, workoutRoutes);
+app.use('/reports', checkToken, reportRoutes);
+app.use('/articles', checkToken, articleRoutes);
+app.use('/challenges', checkToken, challengeRoutes);
 
 // membuat instance socket server
 const io = new Server(server, {
