@@ -12,6 +12,7 @@ app.use(cors());
 app.use(compression());
 
 const authRoutes = require("./routes/auth.routes");
+const publicRoutes = require("./routes/public.routes");
 const medicalCheckupRoutes = require("./routes/medical_checkup.route");
 const postRoutes = require("./routes/post.routes");
 const commentRoutes = require("./routes/comment.routes");
@@ -71,6 +72,7 @@ app.use(methodOverride("_method"));
 app.use('/uploads', express.static('uploads'));
 
 app.use('/', authRoutes);
+app.use('/public', publicRoutes);
 app.use('/posts', checkToken, postRoutes);
 app.use('/comments', checkToken, commentRoutes);
 app.use('/likes', checkToken, likeRoutes);
